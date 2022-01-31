@@ -1,13 +1,16 @@
-package com.geekbrains.spring.web.core.services;
+package com.geekbrains.spring.web.cart.services;
 
-import com.geekbrains.spring.web.api.exceptions.ResourceNotFoundException;
-import com.geekbrains.spring.web.core.dto.Cart;
-import com.geekbrains.spring.web.core.entities.Product;
+import com.geekbrains.spring.web.api.dto.ProductDto;
+import com.geekbrains.spring.web.cart.dto.Cart;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -15,8 +18,16 @@ import java.util.function.Consumer;
 @Service
 @RequiredArgsConstructor
 public class CartService {
-    private final ProductsService productsService;
     private final RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 
     @Value("${utils.cart.prefix}")
     private String cartPrefix;
@@ -37,7 +48,8 @@ public class CartService {
     }
 
     public void addToCart(String cartKey, Long productId) {
-        Product product = productsService.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Невозможно добавить продукт в корзину. Продукт не найдет, id: " + productId));
+        ProductDto product = restTemplate.getForObject("http://core-service/api/v1/products/" + productId);
+//        Product product = productsService.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Невозможно добавить продукт в корзину. Продукт не найдет, id: " + productId));
         execute(cartKey, c -> {
             c.add(product);
         });
