@@ -1,18 +1,25 @@
-package com.geekbrains.spring.web.core.controllers;
+package com.geekbrains.spring.web.cart.controllers;
 
 import com.geekbrains.spring.web.api.dto.StringResponse;
-import com.geekbrains.spring.web.core.dto.Cart;
-import com.geekbrains.spring.web.core.services.CartService;
-import com.geekbrains.spring.web.core.services.ProductsService;
+import com.geekbrains.spring.web.cart.dto.Cart;
+import com.geekbrains.spring.web.cart.services.CartService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
 public class CartsController {
     private final CartService cartService;
-    private final ProductsService productsService;
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 
     @GetMapping("/{uuid}")
     public Cart getCart(@RequestHeader(required = false) String username, @PathVariable String uuid) {
