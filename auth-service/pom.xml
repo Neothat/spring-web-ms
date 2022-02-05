@@ -42,7 +42,7 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.geekbrains</groupId>
+            <groupId>com.geekbrains.web</groupId>
             <artifactId>api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
